@@ -3,7 +3,6 @@ const jwt = require("jsonwebtoken");
 
 import User, { UserModel } from "../models/user.model";
 
-// require("dotenv").config();
 import { config } from "dotenv";
 config();
 const { JWT_SECRET } = process.env;

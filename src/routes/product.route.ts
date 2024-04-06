@@ -9,10 +9,10 @@ import {
 
 const router = express.Router();
 
-router.get("/", authenticateUser, getAllProducts);
+router.get("/", getAllProducts);
 
 router.post("/create", authenticateUser, createProduct);
 
-router.get("/filter", authenticateUser, getFilterProducts);
+router.get("/filter", getFilterProducts);
 
 export default router;

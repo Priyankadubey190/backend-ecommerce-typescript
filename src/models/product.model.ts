@@ -1,4 +1,3 @@
-// src/models/Product.ts
 import mongoose, { Document, Schema } from "mongoose";
 
 export interface ProductModel extends Document {

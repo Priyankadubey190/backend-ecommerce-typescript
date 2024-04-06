@@ -1,4 +1,3 @@
-// src/controllers/authController.ts
 import { Request, Response } from "express";
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -49,7 +48,7 @@ export const login = async (req: Request, res: Response) => {
       { expiresIn: "1h" }
     );
 
-    res.json({ token });
+    res.json({ username: user.username, token });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }

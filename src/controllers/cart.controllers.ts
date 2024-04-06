@@ -22,6 +22,26 @@ export const getCart = async (req: AuthType, res: Response) => {
   }
 };
 
+export const getCartProductById = async (req: AuthType, res: Response) => {
+  try {
+    const productId = req.params.productId;
+    const userId = req.currentUser?._id;
+    const cartProduct: CartModel | null = await Cart.findOne(
+      { userId, "items.product._id": productId },
+      { "items.$": 1 }
+    ).populate("items.product");
+
+    if (!cartProduct) {
+      return res.status(404).json({ message: "Cart product not found" });
+    }
+
+    res.status(200).json({ cartProduct });
+  } catch (error) {
+    console.error("Error getting cart product by ID:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 export const addToCart = async (req: AuthType, res: Response) => {
   try {
     const { productId } = req.params;

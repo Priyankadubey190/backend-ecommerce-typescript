@@ -4,12 +4,13 @@ import authRoutes from "./routes/auth.route";
 import productRoutes from "./routes/product.route";
 import cartRoutes from "./routes/cart.route";
 import checkoutRoutes from "./routes/checkout.route";
-// import dotenv from "dotenv";
+const cors = require("cors");
 
 // dotenv.config();
 const { connection } = require("./config/db");
 
 const app = express();
+app.use(cors());
 const PORT = process.env.PORT || 8080;
 
 app.use(express.json());
