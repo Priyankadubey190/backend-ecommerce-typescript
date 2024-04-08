@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import Cart, { CartModel } from "../models/cart.model";
+import mongoose from "mongoose";
 import { AuthType } from "../middlewares";
+import { Schema } from "mongoose";
 
 const ITEMS_PER_PAGE = 5;
 
@@ -8,7 +10,16 @@ export const getCart = async (req: AuthType, res: Response) => {
   try {
     const { page = 1 } = req.query;
     const userId = req.currentUser?._id;
-    const cart = await Cart.findOne({ userId })
+
+    if (!userId) {
+      return res
+        .status(401)
+        .json({ message: "Unauthorized: User ID not found" });
+    }
+
+    const castedUserId = mongoose.Types.ObjectId(userId.toString());
+
+    const cart = await Cart.findOne({ userId: castedUserId })
       .populate("items.product")
       .limit(ITEMS_PER_PAGE)
       .skip((+page - 1) * ITEMS_PER_PAGE);
@@ -16,6 +27,7 @@ export const getCart = async (req: AuthType, res: Response) => {
     if (!cart) {
       return res.status(404).json({ message: "Cart not found" });
     }
+
     res.json(cart);
   } catch (error: any) {
     res.status(500).json({ message: error.message });
@@ -26,8 +38,17 @@ export const getCartProductById = async (req: AuthType, res: Response) => {
   try {
     const productId = req.params.productId;
     const userId = req.currentUser?._id;
+
+    if (!userId) {
+      return res
+        .status(401)
+        .json({ message: "Unauthorized: User ID not found" });
+    }
+
+    const castedUserId = mongoose.Types.ObjectId(userId.toString());
+
     const cartProduct: CartModel | null = await Cart.findOne(
-      { userId, "items.product._id": productId },
+      { userId: castedUserId, "items.product._id": productId },
       { "items.$": 1 }
     ).populate("items.product");
 
@@ -54,7 +75,9 @@ export const addToCart = async (req: AuthType, res: Response) => {
         .json({ message: "Unauthorized: User ID not found" });
     }
 
-    let cart: CartModel | null = await Cart.findOne({ userId });
+    const castedUserId = mongoose.Types.ObjectId(userId.toString());
+
+    let cart: CartModel | null = await Cart.findOne({ userId: castedUserId });
 
     if (!cart) {
       cart = new Cart({ userId, items: [{ product: productId, quantity: 1 }] });
@@ -82,7 +105,15 @@ export const removeFromCart = async (req: AuthType, res: Response) => {
     const { productId } = req.params;
     const userId = req.currentUser?._id;
 
-    let cart: CartModel | null = await Cart.findOne({ userId });
+    if (!userId) {
+      return res
+        .status(401)
+        .json({ message: "Unauthorized: User ID not found" });
+    }
+
+    const castedUserId = mongoose.Types.ObjectId(userId.toString());
+
+    let cart: CartModel | null = await Cart.findOne({ userId: castedUserId });
 
     if (!cart) {
       return res.status(404).json({ message: "Cart not found" });
@@ -112,7 +143,15 @@ export const updateCartItemQuantity = async (req: AuthType, res: Response) => {
     const { action } = req.body;
     const userId = req.currentUser?._id;
 
-    let cart: CartModel | null = await Cart.findOne({ userId });
+    if (!userId) {
+      return res
+        .status(401)
+        .json({ message: "Unauthorized: User ID not found" });
+    }
+
+    const castedUserId = mongoose.Types.ObjectId(userId.toString());
+
+    let cart: CartModel | null = await Cart.findOne({ userId: castedUserId });
 
     if (!cart) {
       return res.status(404).json({ message: "Cart not found" });

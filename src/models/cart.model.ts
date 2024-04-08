@@ -7,7 +7,7 @@ export interface CartItem {
 }
 
 export interface CartModel extends Document {
-  userId: Schema.Types.ObjectId;
+  userId: mongoose.Types.ObjectId; // Adjusted type here
   items: CartItem[];
 }
 

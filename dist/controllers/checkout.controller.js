@@ -14,11 +14,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.checkout = void 0;
 const cart_model_1 = __importDefault(require("../models/cart.model"));
+const mongoose_1 = __importDefault(require("mongoose"));
 const checkout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
         const userId = (_a = req.currentUser) === null || _a === void 0 ? void 0 : _a._id;
-        const cart = yield cart_model_1.default.findOne({ userId });
+        if (!userId) {
+            return res
+                .status(401)
+                .json({ message: "Unauthorized: User ID not found" });
+        }
+        const castedUserId = mongoose_1.default.Types.ObjectId(userId.toString());
+        const cart = yield cart_model_1.default.findOne({ userId: castedUserId });
         if (!cart) {
             return res.status(404).json({ message: "Cart not found" });
         }

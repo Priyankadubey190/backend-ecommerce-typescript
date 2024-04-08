@@ -14,13 +14,20 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.updateCartItemQuantity = exports.removeFromCart = exports.addToCart = exports.getCartProductById = exports.getCart = void 0;
 const cart_model_1 = __importDefault(require("../models/cart.model"));
+const mongoose_1 = __importDefault(require("mongoose"));
 const ITEMS_PER_PAGE = 5;
 const getCart = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
         const { page = 1 } = req.query;
         const userId = (_a = req.currentUser) === null || _a === void 0 ? void 0 : _a._id;
-        const cart = yield cart_model_1.default.findOne({ userId })
+        if (!userId) {
+            return res
+                .status(401)
+                .json({ message: "Unauthorized: User ID not found" });
+        }
+        const castedUserId = mongoose_1.default.Types.ObjectId(userId.toString());
+        const cart = yield cart_model_1.default.findOne({ userId: castedUserId })
             .populate("items.product")
             .limit(ITEMS_PER_PAGE)
             .skip((+page - 1) * ITEMS_PER_PAGE);
@@ -39,7 +46,13 @@ const getCartProductById = (req, res) => __awaiter(void 0, void 0, void 0, funct
     try {
         const productId = req.params.productId;
         const userId = (_b = req.currentUser) === null || _b === void 0 ? void 0 : _b._id;
-        const cartProduct = yield cart_model_1.default.findOne({ userId, "items.product._id": productId }, { "items.$": 1 }).populate("items.product");
+        if (!userId) {
+            return res
+                .status(401)
+                .json({ message: "Unauthorized: User ID not found" });
+        }
+        const castedUserId = mongoose_1.default.Types.ObjectId(userId.toString());
+        const cartProduct = yield cart_model_1.default.findOne({ userId: castedUserId, "items.product._id": productId }, { "items.$": 1 }).populate("items.product");
         if (!cartProduct) {
             return res.status(404).json({ message: "Cart product not found" });
         }
@@ -61,7 +74,8 @@ const addToCart = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 .status(401)
                 .json({ message: "Unauthorized: User ID not found" });
         }
-        let cart = yield cart_model_1.default.findOne({ userId });
+        const castedUserId = mongoose_1.default.Types.ObjectId(userId.toString());
+        let cart = yield cart_model_1.default.findOne({ userId: castedUserId });
         if (!cart) {
             cart = new cart_model_1.default({ userId, items: [{ product: productId, quantity: 1 }] });
         }
@@ -87,7 +101,13 @@ const removeFromCart = (req, res) => __awaiter(void 0, void 0, void 0, function*
     try {
         const { productId } = req.params;
         const userId = (_d = req.currentUser) === null || _d === void 0 ? void 0 : _d._id;
-        let cart = yield cart_model_1.default.findOne({ userId });
+        if (!userId) {
+            return res
+                .status(401)
+                .json({ message: "Unauthorized: User ID not found" });
+        }
+        const castedUserId = mongoose_1.default.Types.ObjectId(userId.toString());
+        let cart = yield cart_model_1.default.findOne({ userId: castedUserId });
         if (!cart) {
             return res.status(404).json({ message: "Cart not found" });
         }
@@ -110,7 +130,13 @@ const updateCartItemQuantity = (req, res) => __awaiter(void 0, void 0, void 0, f
         const { productId } = req.params;
         const { action } = req.body;
         const userId = (_e = req.currentUser) === null || _e === void 0 ? void 0 : _e._id;
-        let cart = yield cart_model_1.default.findOne({ userId });
+        if (!userId) {
+            return res
+                .status(401)
+                .json({ message: "Unauthorized: User ID not found" });
+        }
+        const castedUserId = mongoose_1.default.Types.ObjectId(userId.toString());
+        let cart = yield cart_model_1.default.findOne({ userId: castedUserId });
         if (!cart) {
             return res.status(404).json({ message: "Cart not found" });
         }
